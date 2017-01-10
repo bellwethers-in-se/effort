@@ -5,7 +5,7 @@ import sys
 
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, BayesianRidge
 
 root = os.path.join(os.getcwd().split('src')[0], 'src')
 if root not in sys.path:
@@ -38,6 +38,16 @@ def rf_model0(source, target, name):
 def linear_model(source, target):
     # Binarize source
     clf = LinearRegression()
+    features = source.columns[:-1]
+    klass = source[source.columns[-1]]
+    clf.fit(source[features], klass)
+    preds = clf.predict(target[target.columns[:-1]])
+    return preds
+
+
+def bayesRegr(source, target):
+    # Binarize source
+    clf = BayesianRidge()
     features = source.columns[:-1]
     klass = source[source.columns[-1]]
     clf.fit(source[features], klass)

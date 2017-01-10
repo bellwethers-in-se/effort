@@ -58,11 +58,9 @@ def bellw(source, target, n_rep=12):
                 tgt = pandas.read_csv(tgt_path)
 
                 for _ in xrange(n_rep):
-                    # _train, __test = weight_training(test_instance=tgt, training_instance=src)
                     columns = list(set(src.columns[:-1]).intersection(tgt.columns[:-1])) + [tgt.columns[-1]]
                     _train, __test = src[columns], tgt[columns]
                     actual, predicted = predict_defects(train=_train, test=__test)
-                    # set_trace()
                     mmre = abs((actual - predicted)) / actual
 
                 stats.append([src_name, round(np.mean(mmre), 1), round(np.std(mmre), 1)])  # ,

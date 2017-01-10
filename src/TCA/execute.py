@@ -6,7 +6,6 @@ import sys
 root = os.path.join(os.getcwd().split('src')[0], 'src')
 if root not in sys.path:
     sys.path.append(root)
-import warnings
 from oracle.model import rf_model
 from utils import *
 from mklaren.kernel.kinterface import Kinterface
@@ -18,7 +17,7 @@ from scipy.spatial.distance import pdist, squareform
 import pandas
 from tabulate import tabulate
 from datasets.handler import get_all_datasets
-from sklearn.metrics import *
+
 
 def get_kernel_matrix(dframe, n_dim=15):
     """

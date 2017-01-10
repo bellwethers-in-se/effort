@@ -1,4 +1,4 @@
-Prec,Flex,Resl,Team,Pmat,rely,data,ruse,docu,cplx,time,stor,pvol,acap,pcap,aexp,plex,ltex,pcon,tool,site,sced,size,effort
+Prec,Flex,Resl,Team,Pmat,rely,data,ruse,docu,cplx,time,stor,pvol,acap,pcap,aexp,plex,ltex,pcon,tool,site,sced,kloc,effort
 4,4,4,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,315.0,112.0
 3,2,3,2,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1912.9,526.5
 5,3,4,2,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,296.1,75.6
