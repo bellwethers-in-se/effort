@@ -3,16 +3,12 @@ from __future__ import print_function, division
 import os
 import sys
 
-root = os.path.join(os.getcwd().split('src')[0], 'src/effort')
+root = os.path.join(os.getcwd().split('src')[0], 'src')
 if root not in sys.path:
     sys.path.append(root)
 import warnings
-from oracle.model import logistic_model, linear_model
 from oracle.model import rf_model
-from py_weka.classifier import classify
 from utils import *
-from metrics.abcd import abcd
-from metrics.recall_vs_loc import get_curve
 from mklaren.kernel.kinterface import Kinterface
 from mklaren.kernel.kernel import *
 from mklaren.projection.icd import ICD
@@ -20,16 +16,9 @@ from pdb import set_trace
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
 import pandas
-from plot.effort_plot import effort_plot
 from tabulate import tabulate
 from datasets.handler import get_all_datasets
-
-# from plot.effort_plot import effort_plot
-
-with warnings.catch_warnings():
-    # Shut those god damn warnings up!
-    warnings.filterwarnings("ignore")
-
+from sklearn.metrics import *
 
 def get_kernel_matrix(dframe, n_dim=15):
     """
@@ -191,9 +180,9 @@ def tca_plus(source, target, n_rep=12):
                                                    norm_tgt.dropna(axis=1, inplace=False))
 
                     actual, predicted = predict_defects(train=_train, test=__test)
-                    mmre = (actual - predicted) / actual
+                    mmre = abs((actual - predicted) / actual)
 
-                stats.append([src_name, int(np.mean(mmre)), int(np.std(mmre))])  # ,
+                stats.append([src_name, round(np.mean(mmre), 1), round(np.std(mmre), 1)])  # ,
 
         stats = pandas.DataFrame(sorted(stats, key=lambda lst: lst[1], reverse=False),  # Sort by G Score
                                  columns=["Name", "MMRE (Mean)", "MMRE (Std)"])  # ,

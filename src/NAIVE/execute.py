@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+
 import os
 import sys
 
@@ -6,17 +7,10 @@ root = os.path.join(os.getcwd().split('src')[0], 'src/effort')
 if root not in sys.path:
     sys.path.append(root)
 
-import warnings
-from oracle.model import logistic_model, rf_model
-from py_weka.classifier import classify
-from utils import *
-from metrics.abcd import abcd
-from metrics.recall_vs_loc import get_curve
+from oracle.model import rf_model
 from pdb import set_trace
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
 import pandas
-from plot.effort_plot import effort_plot
 from tabulate import tabulate
 from datasets.handler import get_all_datasets
 
@@ -36,9 +30,8 @@ def weight_training(test_instance, training_instance):
     # set_trace()
     new_test[tgt[-1]] = test_instance[tgt[-1]]
     new_test.dropna(axis=1, inplace=True)
-    columns = list(set(tgt[:-1]).intersection(new_test.columns[:-1]))+[tgt[-1]]
+    columns = list(set(tgt[:-1]).intersection(new_test.columns[:-1])) + [tgt[-1]]
     return new_train[columns], new_test[columns]
-
 
 
 def predict_defects(train, test):
@@ -70,16 +63,16 @@ def bellw(source, target, n_rep=12):
                     _train, __test = src[columns], tgt[columns]
                     actual, predicted = predict_defects(train=_train, test=__test)
                     # set_trace()
-                    mmre = abs((actual - predicted) * 100 / actual)
+                    mmre = abs((actual - predicted)) / actual
 
-                stats.append([src_name, int(np.mean(mmre)), int(np.std(mmre))])  # ,
+                stats.append([src_name, round(np.mean(mmre), 1), round(np.std(mmre), 1)])  # ,
 
         stats = pandas.DataFrame(sorted(stats, key=lambda lst: lst[1], reverse=False),  # Sort by G Score
-                             columns=["Name", "MMRE (Mean)", "MMRE (Std)"])  # ,
+                                 columns=["Name", "MMRE (Mean)", "MMRE (Std)"])  # ,
         print(tabulate(stats,
-                   headers=["Name", "MMRE (Mean)", "MMRE (Std)"],
-                   showindex="never",
-                   tablefmt="fancy_grid"))
+                       headers=["Name", "MMRE (Mean)", "MMRE (Std)"],
+                       showindex="never",
+                       tablefmt="fancy_grid"))
 
         result.update({tgt_name: stats})
     return result

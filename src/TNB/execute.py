@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+
 import os
 import sys
 
@@ -6,19 +7,14 @@ root = os.path.join(os.getcwd().split('src')[0], 'src/smells')
 if root not in sys.path:
     sys.path.append(root)
 
-import warnings
-from oracle.model import nbayes, rf_model
-from py_weka.classifier import classify
+from oracle.model import nbayes
 from utils import *
 from metrics.abcd import abcd
-from metrics.recall_vs_loc import get_curve
 from pdb import set_trace
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
 import pandas
-from plot.effort_plot import effort_plot
 from tabulate import tabulate
-from datasets.handler2 import get_all_datasets
+from datasets.handler import get_all_datasets
 
 import warnings
 
@@ -41,7 +37,7 @@ def get_weights(train_set, test_set, maxs, mins):
     k = len(train_set.columns)
     w_i = []
     for i in xrange(len(train_set)):
-        s = np.sum([1 if lo <= val < hi else 0 for lo, val, hi in zip(mins, train_set.ix[i].values, maxs)])/k
+        s = np.sum([1 if lo <= val < hi else 0 for lo, val, hi in zip(mins, train_set.ix[i].values, maxs)]) / k
         w_i.append((k * s * mass) / (k - s + 1) ** 2)
     return w_i
 
@@ -61,7 +57,7 @@ def weight_training(weights, training_instance, test_instance):
 
     new_test[tgt[-1]] = test_instance[tgt[-1]]
     new_test.dropna(axis=1, inplace=True)
-    columns = list(set(tgt[:-1]).intersection(new_test.columns[:-1]))+[tgt[-1]]
+    columns = list(set(tgt[:-1]).intersection(new_test.columns[:-1])) + [tgt[-1]]
     return new_train[columns], new_test[columns]
 
 
@@ -100,7 +96,7 @@ def tnb(source, target, n_rep=12):
     :return: result
     """
     result = dict()
-    plot_data =[("Xalan", "Log4j", "Lucene", "Poi", "Velocity")]
+    plot_data = [("Xalan", "Log4j", "Lucene", "Poi", "Velocity")]
     for tgt_name, tgt_path in target.iteritems():
         stats = []
         charts = []
@@ -118,7 +114,6 @@ def tnb(source, target, n_rep=12):
                     _train, __test = weight_training(weights=weights, training_instance=src, test_instance=tgt)
                     set_trace()
                     actual, predicted, distribution = predict_defects(train=_train, test=__test)
-
 
                     # loc = tgt["$loc"].values
                     # loc = loc * 100 / np.max(loc)
@@ -162,7 +157,6 @@ def tnb_jur():
         tnb(paths, paths, n_rep=10)
         print("\n\n")
         # set_trace()
-
 
 
 if __name__ == "__main__":
