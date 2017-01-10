@@ -7,7 +7,7 @@ root = os.path.join(os.getcwd().split('src')[0], 'src')
 if root not in sys.path:
     sys.path.append(root)
 
-from prediction.model import rf_model, rf_model0
+from oracle.model import rf_model, rf_model0
 from old.stats import ABCD
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split

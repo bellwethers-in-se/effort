@@ -7,7 +7,7 @@ if root not in sys.path:
     sys.path.append(root)
 
 import warnings
-from prediction.model import nbayes, rf_model
+from oracle.model import nbayes, rf_model
 from py_weka.classifier import classify
 from utils import *
 from metrics.abcd import abcd

@@ -8,7 +8,7 @@ if root not in sys.path:
     sys.path.append(root)
 
 from data.handler import get_all_projects
-from prediction.model import rf_model
+from oracle.model import rf_model
 from old.stats import ABCD
 from old.sk import rdivDemo
 from sklearn.linear_model import LinearRegression
