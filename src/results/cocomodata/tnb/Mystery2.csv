@@ -1,5 +1,5 @@
-Name,MMRE (Mean),MMRE (Std)
-cocomo,0.8,0.2
-Mystery1,33.3,53.2
-coc81,73.6,166.6
-nasa93,127.0,186.6
+Name,SA (Mean),SA (Std)
+nasa93,-0.0,1.5
+Mystery1,0.3,1.1
+coc81,0.6,1.0
+cocomo,1.0,0.0

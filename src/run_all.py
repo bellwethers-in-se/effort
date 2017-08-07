@@ -27,11 +27,11 @@ def deploy(elem):
         stats.to_csv(path, index=False)
 
 
-def run(serial=True):
+def run(serial=False):
     all = {"CocomoData": get_all_datasets()}
     dir_names = {
-        "bell": bellw
-        , "tca": tca_plus
+        "bell": bellw,
+        "tca": tca_plus
         , "tnb": tnb
     }
     tasks = []
@@ -42,11 +42,11 @@ def run(serial=True):
                     os.makedirs(save_path)
                 tasks.append(((data, project), (f_name, method)))
 
-    if serial:
-        map(deploy, tasks)
-    else:
-        pool = multiprocessing.Pool(processes=4)
-        pool.map(deploy, tasks)
+    # if serial:
+    map(deploy, tasks)
+    # else:
+    #     pool = multiprocessing.Pool(processes=4)
+    #     pool.map(deploy, tasks)
 
 
 if __name__ == "__main__":

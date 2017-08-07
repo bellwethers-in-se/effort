@@ -13,6 +13,7 @@ import numpy as np
 import pandas
 from tabulate import tabulate
 from datasets.handler import get_all_datasets
+from random import uniform
 
 
 def weight_training(test_instance, training_instance):
@@ -39,6 +40,17 @@ def predict_defects(train, test):
     predicted = rf_model(train, test)
     return actual, predicted
 
+def get_mar_p0(trn, tst, n_rep):
+    effort =  trn[trn.columns[-1]].values.tolist() \
+        + tst[tst.columns[-1]].values.tolist()
+    hi, lo = max(effort), min(effort)
+    res = []
+    for _ in xrange(n_rep):
+        actual = tst[tst.columns[-1]].values
+        predicted = np.array([uniform(lo, hi) for __ in xrange(len(actual))])
+        res.append(abs((actual - predicted) / actual))
+
+    return np.mean(res)
 
 def bellw(source, target, n_rep=12):
     """
@@ -61,15 +73,17 @@ def bellw(source, target, n_rep=12):
                     columns = list(set(src.columns[:-1]).intersection(tgt.columns[:-1])) + [tgt.columns[-1]]
                     _train, __test = src[columns], tgt[columns]
                     actual, predicted = predict_defects(train=_train, test=__test)
-                    mmre = abs((actual - predicted)) / actual
+                    MAR = abs((actual - predicted) / actual)
+                    MAR_p0 = get_mar_p0(_train, __test, n_rep=1000)
+                    SA = (1-MAR/MAR_p0)
 
-                stats.append([src_name, round(np.mean(mmre), 1), round(np.std(mmre), 1)])  # ,
+
+                stats.append([src_name, round(np.mean(SA), 1), round(np.std(SA), 1)])  # ,
 
         stats = pandas.DataFrame(sorted(stats, key=lambda lst: lst[1], reverse=False),  # Sort by G Score
-                                 columns=["Name", "MMRE (Mean)", "MMRE (Std)"])  # ,
+                                 columns=["Name", "SA (Mean)", "SA (Std)"])  # ,
         print(tabulate(stats,
-                       headers=["Name", "MMRE (Mean)", "MMRE (Std)"],
-                       showindex="never",
+                       headers=["Name", "SA (Mean)", "SA (Std)"],
                        tablefmt="fancy_grid"))
 
         result.update({tgt_name: stats})

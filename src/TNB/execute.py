@@ -13,6 +13,7 @@ import numpy as np
 import pandas
 from tabulate import tabulate
 from datasets.handler import get_all_datasets
+from random import uniform
 
 
 def target_details(test_set):
@@ -61,6 +62,18 @@ def predict_defects(train, test, weka=False):
     predicted = bayesRegr(train, test)
     return actual, predicted
 
+def get_mar_p0(trn, tst, n_rep):
+    effort =  trn[trn.columns[-1]].values.tolist() \
+        + tst[tst.columns[-1]].values.tolist()
+    hi, lo = max(effort), min(effort)
+    res = []
+    for _ in xrange(n_rep):
+        actual = tst[tst.columns[-1]].values
+        predicted = np.array([uniform(lo, hi) for __ in xrange(len(actual))])
+        res.append(abs((actual - predicted) / actual))
+
+    return np.mean(res)
+
 
 def tnb(source, target, n_rep=12):
     """
@@ -83,18 +96,18 @@ def tnb(source, target, n_rep=12):
                     lo, hi, test_mass = target_details(tgt)
                     weights = get_weights(maxs=hi, mins=lo, train_set=src, test_set=tgt)
                     _train, __test = weight_training(weights=weights, training_instance=src, test_instance=tgt)
-
                     actual, predicted = predict_defects(train=_train, test=__test)
-                    # set_trace()
-                    mmre = abs((actual - predicted) / actual)
+                    MAR = abs((actual - predicted) / actual)
+                    MAR_p0 = get_mar_p0(_train, __test, n_rep=1000)
+                    SA = (1-MAR/MAR_p0)
+                    # SA = abs((actual - predicted) / actual)
 
-                stats.append([src_name, round(np.mean(mmre), 1), round(np.std(mmre), 1)])  # ,
+                stats.append([src_name, round(np.mean(SA), 1), round(np.std(SA), 1)])  # ,
 
         stats = pandas.DataFrame(sorted(stats, key=lambda lst: lst[1], reverse=False),  # Sort by G Score
-                                 columns=["Name", "MMRE (Mean)", "MMRE (Std)"])  # ,
+                                 columns=["Name", "SA (Mean)", "SA (Std)"])  # ,
         print(tabulate(stats,
-                       headers=["Name", "MMRE (Mean)", "MMRE (Std)"],
-                       showindex="never",
+                       headers=["Name", "SA (Mean)", "SA (Std)"],
                        tablefmt="fancy_grid"))
 
         result.update({tgt_name: stats})

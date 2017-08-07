@@ -17,7 +17,7 @@ from scipy.spatial.distance import pdist, squareform
 import pandas
 from tabulate import tabulate
 from datasets.handler import get_all_datasets
-
+from random import uniform
 
 def get_kernel_matrix(dframe, n_dim=15):
     """
@@ -87,7 +87,11 @@ def get_dcv(src, tgt):
     T = tgt[t_col]
 
     def self_dist_mtx(arr):
-        dist_arr = pdist(arr)
+        try:
+            dist_arr = pdist(arr)
+        except:
+            set_trace()
+
         return squareform(dist_arr)
 
     dist_src = self_dist_mtx(S.values)
@@ -152,6 +156,18 @@ def smart_norm(src, tgt, c_s, c_t):
         set_trace()
         return src, tgt
 
+def get_mar_p0(trn, tst, n_rep):
+    effort =  trn[trn.columns[-1]].values.tolist() \
+        + tst[tst.columns[-1]].values.tolist()
+    hi, lo = max(effort), min(effort)
+    res = []
+    for _ in xrange(n_rep):
+        actual = tst[tst.columns[-1]].values
+        predicted = np.array([uniform(lo, hi) for __ in xrange(len(actual))])
+        res.append(abs((actual - predicted) / actual))
+
+    return np.mean(res)
+
 
 def tca_plus(source, target, n_rep=12):
     """
@@ -170,6 +186,7 @@ def tca_plus(source, target, n_rep=12):
             if not src_name == tgt_name:
                 src = pandas.read_csv(src_path)
                 tgt = pandas.read_csv(tgt_path)
+                # set_trace()
                 dcv_src, dcv_tgt = get_dcv(src, tgt)
 
                 for _ in xrange(n_rep):
@@ -177,20 +194,21 @@ def tca_plus(source, target, n_rep=12):
 
                     _train, __test = map_transform(norm_src.dropna(axis=1, inplace=False),
                                                    norm_tgt.dropna(axis=1, inplace=False))
-
                     actual, predicted = predict_defects(train=_train, test=__test)
-                    mmre = abs((actual - predicted) / actual)
+                    MAR = abs((actual - predicted) / actual)
+                    MAR_p0 = get_mar_p0(_train, __test, n_rep=1000)
+                    SA = (1-MAR/MAR_p0)
 
-                stats.append([src_name, round(np.mean(mmre), 1), round(np.std(mmre), 1)])  # ,
+                stats.append([src_name, round(np.mean(SA), 1), round(np.std(SA), 1)])  # ,
 
         stats = pandas.DataFrame(sorted(stats, key=lambda lst: lst[1], reverse=False),  # Sort by G Score
-                                 columns=["Name", "MMRE (Mean)", "MMRE (Std)"])  # ,
+                                 columns=["Name", "SA (Mean)", "SA (Std)"])  # ,
         print(tabulate(stats,
-                       headers=["Name", "MMRE (Mean)", "MMRE (Std)"],
-                       showindex="never",
+                       headers=["Name", "SA (Mean)", "SA (Std)"],
                        tablefmt="fancy_grid"))
 
         result.update({tgt_name: stats})
+        # set_trace()
     return result
 
 
